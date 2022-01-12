@@ -1,12 +1,10 @@
-<p>
-    <img width="100" height="100" src="docs/src/assets/logo.svg?raw=true" />
-</p>
+<img width="100" height="100" src="docs/src/assets/logo.svg?raw=true" />
 
 # SpmSpectroscopy
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://alexriss.github.io/SpmSpectropscopy.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alexriss.github.io/SpmSpectropscopy.jl/dev)
-[![Build Status](https://github.com/alexriss/SpmSpectropscopy.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/alexriss/SpmSpectropscopy.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://alexriss.github.io/SpmSpectroscopy.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alexriss.github.io/SpmSpectroscopy.jl/dev)
+[![Build Status](https://github.com/alexriss/SpmSpectroscopy.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/alexriss/SpmSpectroscopy.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 A julia library to analyze scanning tunneling and atomic force spectroscopy data.
 
