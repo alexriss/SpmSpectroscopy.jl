@@ -1,6 +1,6 @@
 <img width="100" height="100" src="docs/src/assets/logo.svg?raw=true" />
 
-# SpmSpectroscopy
+# SpmSpectroscopy.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://alexriss.github.io/SpmSpectroscopy.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alexriss.github.io/SpmSpectroscopy.jl/dev)
