@@ -35,15 +35,16 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; header_only::Bool=false)::SpmSpectrum
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
+`select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 """
-function load_spectrum(filename::AbstractString; header_only::Bool=false)::SpmSpectrum
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
-        spectrum = load_spectrum_nanonis(filename, header_only=header_only)
+        spectrum = load_spectrum_nanonis(filename, header_only=header_only, select=select)
     else
         throw(ArgumentError("Unknown file type \"$ext\""))
     end
@@ -53,12 +54,13 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; header_only::Bool=false)::SpmSpectrum
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
+`select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 """
-function load_spectrum_nanonis(filename::AbstractString; header_only::Bool=false)::SpmSpectrum
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
     contents_data = ""
     header = OrderedDict{String,Any}()
     data = DataFrame()
@@ -114,7 +116,11 @@ function load_spectrum_nanonis(filename::AbstractString; header_only::Bool=false
 
         if !header_only
             contents_data = read(f, String)
-            data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names)
+            if length(select) > 0
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, select=select)
+            else
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names)
+            end
         end
     end
 
