@@ -16,8 +16,8 @@ using Test
     @test s.data[!,"Index"] == collect(1:size(s.data,1))
 
     s = load_spectrum("Z-Spectroscopy__012.dat", index_column=true, index_column_type=Float64)
-    @test s.data[3,"Index"] ≈ 3.0
-    
+    @test s.data[3,"Index"] === 3.0
+
     x = [1.,2.,3.]
     y = [4.,5.,6.]
     correct_background!(x, y, no_correction)

@@ -47,7 +47,7 @@ If `index_column` is `true`, then an extra column with indices of type `index_co
 function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
-        spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column)
+        spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column, index_column_type=index_column_type)
     else
         throw(ArgumentError("Unknown file type \"$ext\""))
     end
