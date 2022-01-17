@@ -157,11 +157,13 @@ function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVecto
     if type == linear_fit
         # https://en.wikipedia.org/wiki/Ordinary_least_squares#Simple_linear_regression_model
 
-        varx = var(xdata)  # same for each row
-        meanx = mean(xdata)
-        β = cov(xdata, ydata) / varx
-        α = mean(ydata) - β * meanx
-        @. ydata = ydata - α - xdata * β
+        varx = var(xdata)
+        if varx > 0
+            meanx = mean(xdata)
+            β = cov(xdata, ydata) / varx
+            α = mean(ydata) - β * meanx
+            @. ydata = ydata - α - xdata * β
+        end
     end
     if type == subtract_minimum || offset
         m = minimum(filter(!isnan, ydata))
