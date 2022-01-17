@@ -4,11 +4,13 @@ using CSV
 using DataFrames
 using DataStructures:OrderedDict
 using Dates
+using Statistics
 
 export SpmSpectrum, load_spectrum, get_channel
-
+export correct_background!, no_correction, subtract_minimum, linear_fit
 
 @enum Direction bwd fwd
+@enum Background no_correction subtract_minimum linear_fit
 
 mutable struct SpmSpectrum
     filename::String
@@ -35,16 +37,17 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
+If `index_column` is `true`, then an extra column with indices will be added.
 """
-function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
-        spectrum = load_spectrum_nanonis(filename, header_only=header_only, select=select)
+        spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column)
     else
         throw(ArgumentError("Unknown file type \"$ext\""))
     end
@@ -54,13 +57,14 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
+If `index_column` is `true`, then an extra column with indices will be added.
 """
-function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false)::SpmSpectrum
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
     contents_data = ""
     header = OrderedDict{String,Any}()
     data = DataFrame()
@@ -121,10 +125,45 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             else
                 data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names)
             end
+            
+            if index_column
+                data[!,"Index"] = 1:size(data,1)
+            end
+        end
+        if index_column
+            push!(channel_names, "Index")
+            push!(channel_units, "")
         end
     end
 
     return SpmSpectrum(filename, header, data, channel_names, channel_units, position, bias, z_feedback, start_time)
+end
+
+
+"""
+    function correct_background!(xdata::T, ydata::T, type::Background, offset::Bool=true)::Tuple(T, T) where T::Vector{<:Number}
+
+Background correction of `ydata` vs. `xdata` with using a correction of type `type`.
+If `offset` is `true` (default), then `ydata` will be shifted such that its minimum is 0..
+"""
+function correct_background!(xdata::T, ydata::T, type::Background, offset::Bool=true)::Nothing where T<:Vector{<:Number}
+    if type == no_correction
+        return nothing
+    end
+    if type == linear_fit
+        # https://en.wikipedia.org/wiki/Ordinary_least_squares#Simple_linear_regression_model
+
+        varx = var(xdata)  # same for each row
+        meanx = mean(xdata)
+        β = cov(xdata, ydata) / varx
+        α = mean(ydata) - β * meanx
+        @. ydata = ydata - α - xdata * β
+    end
+    if type == subtract_minimum || offset
+        m = minimum(filter(!isnan, ydata))
+        ydata .-= m
+    end
+    return nothing
 end
 
 
