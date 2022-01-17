@@ -37,14 +37,14 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
-If `index_column` is `true`, then an extra column with indices will be added.
+If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 """
-function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
         spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column)
@@ -57,14 +57,14 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
-If `index_column` is `true`, then an extra column with indices will be added.
+If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 """
-function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false)::SpmSpectrum
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
     contents_data = ""
     header = OrderedDict{String,Any}()
     data = DataFrame()
@@ -127,7 +127,11 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             end
             
             if index_column
-                data[!,"Index"] = 1:size(data,1)
+                if index_column_type == Int64
+                    data[!,"Index"] = 1:size(data,1)
+                else
+                    data[!,"Index"] = convert.(index_column_type, 1:size(data,1))
+                end
             end
         end
         if index_column
@@ -141,12 +145,12 @@ end
 
 
 """
-    function correct_background!(xdata::T, ydata::T, type::Background, offset::Bool=true)::Tuple(T, T) where T::Vector{<:Number}
+    function correct_background!(xdata<:Vector{<:Real}, ydata<:Vector{<:AbstractFloat}, type::Background, offset::Bool=true)::Nothing
 
 Background correction of `ydata` vs. `xdata` with using a correction of type `type`.
 If `offset` is `true` (default), then `ydata` will be shifted such that its minimum is 0..
 """
-function correct_background!(xdata::T, ydata::T, type::Background, offset::Bool=true)::Nothing where T<:Vector{<:Number}
+function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVector{<:AbstractFloat}, type::Background, offset::Bool=true)::Nothing
     if type == no_correction
         return nothing
     end
