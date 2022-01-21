@@ -37,14 +37,18 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+        index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 """
-function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+    index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
         spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column, index_column_type=index_column_type)
@@ -57,14 +61,17 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+        index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 """
-function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+    index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+
     contents_data = ""
     header = OrderedDict{String,Any}()
     data = DataFrame()
@@ -170,6 +177,122 @@ function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVecto
         ydata .-= m
     end
     return nothing
+end
+
+
+"""
+    function trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
+
+Trapezoidal integration over a function fiven by dicrete points in the arrays `Y` vs `X`,
+where the spacing between the points in `X` is not necessarily constant.
+"""
+function trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
+    @assert length(X) == length(Y)
+    res = 0.
+    for i = 1:length(X) - 1
+        res += (X[i+1] - X[i]) * (Y[i] + Y[i+1])
+    end
+    return res / 2.
+end
+
+
+"""
+    function rolling_mean(arr::AbstractArray{Float64}, n::Int64)::AbstractArray{Float64}
+
+Computes the rolling mean over `n` points. The length of the output array is decreased by `n-1` points.
+
+Adapted from:
+https://stackoverflow.com/questions/59562325/moving-average-in-julia
+"""
+function rolling_mean(arr::AbstractArray{Float64}, n::Int64)::AbstractArray{Float64}
+    so_far = sum(@view arr[1:n])
+    out = zeros(Float64, length(arr) - n + 1)
+    out[1] = so_far / n
+    for (i, (start, stop)) in enumerate(zip(arr, @view arr[n+1:end]))
+        so_far += stop - start
+        out[i+1] = so_far / n
+    end
+    return out
+end
+
+
+"""
+    function deconvolve_sadar_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+    
+AFM force deconvolution using the Sadar-Jarvis method, as described in [Appl. Phys. Lett. 84, 1801 (2004)](https://aip.scitation.org/doi/10.1063/1.1667267).
+Values for the tip-height `z` should be in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
+the experimental parameters `f₀` (resonance frequency), `A` (oscillation amplitude), and `k` (cantilever stiffness).
+
+Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
+"""
+function deconvolve_sadar_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+    @assert issorted(z)
+    
+    ω = Δf / f₀
+    dω_dz = diff(ω) ./ diff(z)
+    
+    F = Vector{Float64}(undef, length(z) - 2)
+
+    # we use `end-1` for both z and ω because dω_dz is shorter by one element
+    for j=1:length(z)-3
+        
+        # adjust length of z, ω and dω_dz
+        t = @view z[j+1:end-1]
+        ω_ = @view ω[j+1:end-1]
+        dω_dz_ = @view dω_dz[j+1:end]     
+        
+        integral = trapz(
+            t,
+            @. (1 + sqrt(A) / (8 * sqrt(π * (t - z[j])))) * ω_ - A^(3/2) / sqrt(2 * (t - z[j])) * dω_dz_
+        )
+                    
+        # correction terms
+        corr1 = ω[j] * (z[j+1] -z[j])
+        corr2 = 2 * (sqrt(A) / (8 * sqrt(pi))) * ω[j] * sqrt(z[j+1] - z[j])
+        corr3 = (-2) * (sqrt(A)^3 / sqrt(2)) * dω_dz[j] * sqrt(z[j+1] - z[j])
+        F[j] = 2 * k * (corr1 + corr2 + corr3 + integral)
+    end
+    
+    # adjust length of z
+    z_ = z[1:length(F)]
+
+    return z_, F
+end
+
+
+"""
+AFM force deconvolution using the Matrix method, as described in [Appl. Phys. Lett. 78, 123 (2001)](https://aip.scitation.org/doi/10.1063/1.1335546).
+Values for the tip-height `z` should be qually spaced and in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
+the experimental parameters `f₀` (resonance frequency), `A` (oscillation amplitude), and `k` (cantilever stiffness).
+    
+Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
+"""
+function deconvolve_matrix(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+    @assert issorted(z)
+
+    Δf_r = @view Δf[end:-1:1]
+    Δz = z[2] - z[1]
+
+    α = round(Int64, A / Δz)
+
+    N = length(z)
+    # W = Array{Float64}(undef, N, N)
+    W = zeros(Float64, N, N)
+
+    for i = 1:N
+        x = max(i - 2α, 1)
+        for j = x:i
+            W[i,j] = (f₀ / 2 / k) * (2 / π / A) * 2 / (2α + 1) * (sqrt((2α + 1) * (i - j + 1) - (i - j + 1)^2)-sqrt((2α + 1) * (i - j) - (i - j)^2))
+
+            # τ1 = 1 - 2(i - j + 1) / (2α + 1)
+            # τ2 = 1 - 2(i - j) / (2α + 1)
+            # W[i,j] = (f₀ / 2 / k) * (2 / π / A) * (-sqrt(1 - τ2^2) + sqrt(1 - τ1^2))
+        end
+    end
+
+    F = W \ Δf_r
+    reverse!(F)
+    return z[1:end], F  # return copy of z
 end
 
 
