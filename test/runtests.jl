@@ -17,6 +17,12 @@ using Test
 
     s = load_spectrum("Z-Spectroscopy__012.dat", index_column=true, index_column_type=Float64)
     @test s.data[3,"Index"] === 3.0
+
+    s = load_spectrum("Z-Spectroscopy002.dat", remove_missing=false)
+    @test size(s.data) == (256,17)
+
+    s = load_spectrum("Z-Spectroscopy002.dat")  # default for remove_missing is true
+    @test size(s.data) == (77,17)
 end
 
 @testset "background corrections" begin
@@ -57,7 +63,7 @@ end
     30.57142857, 44.04761905, 54.88095238, 61.52380952, 61.30952381]  #using scipy.signal.savgol_filter(a, 7, 3, mode="interp")
     @test all(abs.(SpmSpectroscopy.savitzky_golay_filter(a, 7, 3) .- a_sg) .< 1e-6)
 
-    a_sg = [ 13.4047619 ,  13.57142857,  13.73809524,  13.9047619 ,
+    a_sg = [ 13.4047619 ,  13.57142857,  13.73809524,  13.9047619,
          5.33333333,  -3.61904762, -12.30952381, -10.76190476,
          2.52380952,   3.92857143,   7.11904762,   3.14285714,
         -0.35714286,  -4.76190476,  -9.33333333,  -5.04761905,

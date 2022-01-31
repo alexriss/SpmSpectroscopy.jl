@@ -45,7 +45,7 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
         index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 
@@ -53,13 +53,14 @@ Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files ar
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
+If `remove_missing` is `true` (default), then missing values are dropped.
 """
-function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
     index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
-        spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, index_column=index_column, index_column_type=index_column_type)
+        spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, remove_missing=remove_missing, index_column=index_column, index_column_type=index_column_type)
     else
         throw(ArgumentError("Unknown file type \"$ext\""))
     end
@@ -69,15 +70,16 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
         index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
+If `remove_missing` is `true`, then missing values are dropped.
 """
-function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false,
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
     index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
     contents_data = ""
@@ -136,11 +138,15 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
         if !header_only
             contents_data = read(f, String)
             if length(select) > 0
-                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, select=select)
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN", select=select)
             else
-                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names)
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN")
             end
-            
+
+            if remove_missing
+                dropmissing!(data)
+            end
+
             if index_column
                 if index_column_type == Int64
                     data[!,"Index"] = 1:size(data,1)
