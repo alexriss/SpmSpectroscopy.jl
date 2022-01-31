@@ -18,11 +18,11 @@ using Test
     s = load_spectrum("Z-Spectroscopy__012.dat", index_column=true, index_column_type=Float64)
     @test s.data[3,"Index"] === 3.0
 
-    s = load_spectrum("Z-Spectroscopy002.dat", remove_missing=false)
-    @test size(s.data) == (256,17)
-
-    s = load_spectrum("Z-Spectroscopy002.dat")  # default for remove_missing is true
+    s = load_spectrum("Z-Spectroscopy002.dat", remove_missing=true)
     @test size(s.data) == (77,17)
+
+    s = load_spectrum("Z-Spectroscopy002.dat")  # default for remove_missing is false
+    @test size(s.data) == (256,17)
 end
 
 @testset "background corrections" begin

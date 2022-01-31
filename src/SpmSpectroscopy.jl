@@ -45,7 +45,7 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
+    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
         index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 
@@ -53,9 +53,9 @@ Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files ar
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
 If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
-If `remove_missing` is `true` (default), then missing values are dropped.
+If `remove_missing` is `true`, then missing values are dropped.
 """
-function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
+function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
     index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
     ext = rsplit(filename, "."; limit=2)[end]
@@ -70,7 +70,7 @@ end
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
+    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
         index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
@@ -79,7 +79,7 @@ If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 If `remove_missing` is `true`, then missing values are dropped.
 """
-function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=true,
+function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
     index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
 
     contents_data = ""
