@@ -38,6 +38,20 @@ end
     y = [4.,5.,7.]
     correct_background!(x, y, linear_fit)
     @test all(y .≈ [0.5,0.,0.5])
+
+    # some special cases
+    x = [0., 0.]
+    y = [2., 2.]
+    correct_background!(x, y, linear_fit)
+    @test y ≈ [0., 0.]
+    x = [0.]
+    y = [0.]
+    correct_background!(x, y, linear_fit)
+    @test y ≈ [0.]
+    x = Float64[]
+    y = Float64[]
+    correct_background!(x, y, linear_fit)
+    @test length(y) == 0
 end
 
 @testset "spectrum manipulations" begin
