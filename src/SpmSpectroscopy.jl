@@ -34,7 +34,7 @@ mutable struct SpmSpectrum
     
     start_time::DateTime
 end
-SpmSpectrum(filename::String) = SpmImage(filename, OrderedDict(), DataFrame(), String[], String[], Float64[], 0., false, Dates.now())
+SpmSpectrum(filename::String) = SpmImage(filename, OrderedDict(), DataFrame(), String[], String[], Float64[], 0., false, DateTime(-1))
 
 mutable struct SpmSpectrumChannel
     channel_name::String
@@ -90,7 +90,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
     position = Float64[NaN,NaN,NaN]
     bias = NaN
     z_feedback = false
-    start_time = Dates.now()
+    start_time = DateTime(-1)
     open(filename) do f
         while !eof(f)
             l = readline(f)
