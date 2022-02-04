@@ -29,7 +29,7 @@ s.data[!, "Current"]  # get data for a "Current" channel
 
 ## Related projects
 
-- [SpmImageTycoon.jl](https://github.com/alexriss/SpmImageTycoon.jl): App to organize SPM images.
+- [SpmImageTycoon.jl](https://github.com/alexriss/SpmImageTycoon.jl): App to organize SPM images and spectra.
 - [SpmImages.jl](https://github.com/alexriss/SpmImages.jl): Julia library to read and display SPM images.
 - [imag*ex*](https://github.com/alexriss/imagex): Python scripts to analyze scanning probe images.
 - [grid*ex*](https://github.com/alexriss/gridex): Python scripts to analyze 3D grid data.
