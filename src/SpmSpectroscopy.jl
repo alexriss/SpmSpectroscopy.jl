@@ -11,8 +11,8 @@ using LinearAlgebra: pinv
 
 export SpmSpectrum, load_spectrum,
     correct_background!, no_correction, subtract_minimum, linear_fit,
-    deconvolve_sader_jarvis, deconvolve_matrix,
-    savitzky_golay_filter
+    # deconvolve_sader_jarvis, deconvolve_matrix,
+    # savitzky_golay_filter
 
 include("spectrum_functions.jl")
 include("AFM_functions.jl")
@@ -46,7 +46,7 @@ end
 
 """
     function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
-        index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+        index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
@@ -56,7 +56,7 @@ If `index_column` is `true`, then an extra column with indices of type `index_co
 If `remove_missing` is `true`, then missing values are dropped.
 """
 function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
-    index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+    index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
     ext = rsplit(filename, "."; limit=2)[end]
     if ext == "dat"
@@ -71,7 +71,7 @@ end
 
 """
     function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
-        index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+        index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
 `select` can be used to specify which columns to load (see CSV.jl for an explanation of `select`).
@@ -80,7 +80,7 @@ If `index_column` is `true`, then an extra column with indices of type `index_co
 If `remove_missing` is `true`, then missing values are dropped.
 """
 function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
-    index_column::Bool=false, index_column_type::Type=Int64)::SpmSpectrum
+    index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
     contents_data = ""
     header = OrderedDict{String,Any}()
@@ -148,7 +148,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             end
 
             if index_column
-                if index_column_type == Int64
+                if index_column_type == Int
                     data[!,"Index"] = 1:size(data,1)
                 else
                     data[!,"Index"] = convert.(index_column_type, 1:size(data,1))

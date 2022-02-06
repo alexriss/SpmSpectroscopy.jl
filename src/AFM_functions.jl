@@ -57,7 +57,7 @@ function deconvolve_matrix(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64):
     Δf_r = @view Δf[end:-1:1]
     Δz = z[2] - z[1]
 
-    α = round(Int64, A / Δz)
+    α = round(Int, A / Δz)
 
     N = length(z)
     # W = Array{Float64}(undef, N, N)
@@ -82,7 +82,7 @@ end
 
 """
     function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
-    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int64,Nothing}}
+    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
     
 Inflection point test on whether a AFM force deconvolution is reliable. The test has been described in [Nature Nanotechnology volume 13, 1088– (2018)](https://www.nature.com/articles/s41565-018-0277-x).
 Values for the tip-height `z` should be equally spaced and in ascending order. The corresponding values for force (after deconvolution) are given in the vector `f`. The value for the oscillation amplitude
@@ -105,7 +105,7 @@ Based on MATLAB code from [Journal of Applied Physics 127, 184301 (2020)](https:
 
 """
 function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
-    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int64,Nothing}}
+    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
 
     @assert length(z) == length(F)
 
@@ -149,7 +149,7 @@ function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, 
     i_lim = [max(i_F′_extr, 2), N-1]  # cut outermost points
     
     # get inflection points by finding sign changes of second derivative
-    i_ifp = Int64[]
+    i_ifp = Int[]
     for i in i_lim[2] : -1 : i_lim[1]  # from far to low
         if sign(F′′_sg_sg[i]) != sign(F′′_sg_sg[i+1])
             push!(i_ifp, i)

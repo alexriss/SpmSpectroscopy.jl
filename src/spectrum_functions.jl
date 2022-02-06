@@ -15,14 +15,14 @@ end
 
 
 """
-    function rolling_mean(arr::AbstractArray{Float64}, n::Int64)::AbstractArray{Float64}
+    function rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
 
 Computes the rolling mean over `n` points. The length of the output array is decreased by `n-1` points.
 
 Adapted from:
 https://stackoverflow.com/questions/59562325/moving-average-in-julia
 """
-function rolling_mean(arr::AbstractArray{Float64}, n::Int64)::AbstractArray{Float64}
+function rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
     so_far = sum(@view arr[1:n])
     out = zeros(Float64, length(arr) - n + 1)
     out[1] = so_far / n
