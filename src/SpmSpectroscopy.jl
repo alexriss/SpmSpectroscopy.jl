@@ -10,7 +10,7 @@ using Statistics
 using LinearAlgebra: pinv
 
 export SpmSpectrum, load_spectrum,
-    correct_background!, no_correction, subtract_minimum, linear_fit,
+    correct_background!, no_correction, subtract_minimum, linear_fit
     # deconvolve_sader_jarvis, deconvolve_matrix,
     # savitzky_golay_filter
 
