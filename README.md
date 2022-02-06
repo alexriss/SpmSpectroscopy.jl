@@ -8,7 +8,7 @@
 
 A julia library to analyze scanning tunneling and atomic force spectroscopy data.
 
-*Currently in early stages, with support for Nanonis spectroscopy files. So far, it is only tested for Bias and Z spectrocopy experiments. Reading of other experiments and file formats will be implemented if needed.*
+*Currently in early stages, with support for Nanonis spectroscopy files. So far, it is only tested for Bias and Z spectroscopy experiments. Reading of other experiments and file formats will be implemented if needed.*
 
 ## Usage
 
