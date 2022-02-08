@@ -2,7 +2,7 @@ module SpmSpectroscopy
 
 using CSV
 using DataFrames
-using DataStructures:OrderedDict
+using DataStructures: OrderedDict
 using Dates
 using Plots
 using Printf
@@ -22,7 +22,7 @@ include("AFM_functions.jl")
 
 mutable struct SpmSpectrum
     filename::String
-    header::AbstractDict
+    header::OrderedDict{String,String}
     data::DataFrame
     channel_names::Vector{String}
     channel_units::Vector{String}
@@ -67,6 +67,7 @@ function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], 
 
     return spectrum
 end
+precompile(load_spectrum, (String, ))
 
 
 """
@@ -83,7 +84,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
     index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
     contents_data = ""
-    header = OrderedDict{String,Any}()
+    header = OrderedDict{String,String}()
     data = DataFrame()
     channel_names = Vector{String}()
     channel_units = Vector{String}()
@@ -163,6 +164,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
 
     return SpmSpectrum(filename, header, data, channel_names, channel_units, position, bias, z_feedback, start_time)
 end
+precompile(load_spectrum_nanonis, (String, ))
 
 
 """
@@ -195,7 +197,6 @@ function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVecto
     end
     return nothing
 end
-
-
+precompile(correct_background!, (Vector{Float64}, Vector{Float64}, Background, Bool))
 
 end
