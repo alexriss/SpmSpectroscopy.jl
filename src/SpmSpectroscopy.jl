@@ -7,6 +7,7 @@ using Dates
 using Plots
 using Printf
 using Statistics
+using TOML
 using LinearAlgebra: pinv
 
 export SpmSpectrum, load_spectrum,
@@ -16,6 +17,9 @@ export SpmSpectrum, load_spectrum,
 
 include("spectrum_functions.jl")
 include("AFM_functions.jl")
+
+const VERSION = VersionNumber(TOML.parsefile(joinpath(@__DIR__, "../Project.toml"))["version"])
+
 
 @enum Direction bwd fwd
 @enum Background no_correction subtract_minimum linear_fit
