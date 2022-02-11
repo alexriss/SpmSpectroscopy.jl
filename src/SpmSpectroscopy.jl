@@ -143,9 +143,9 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
         if !header_only
             contents_data = read(f, String)
             if length(select) > 0
-                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN", select=select)
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN", types=Float64, select=select)
             else
-                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN")
+                data = CSV.read(IOBuffer(contents_data), DataFrame, header=channel_names, missingstring="NaN", types=Float64)
             end
 
             if remove_missing
