@@ -1,5 +1,5 @@
 """
-    function trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
+    trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
 
 Trapezoidal integration over a function given by dicrete points in the arrays `Y` vs `X`,
 where the spacing between the points in `X` is not necessarily constant.
@@ -15,7 +15,7 @@ end
 
 
 """
-    function rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
+    rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
 
 Computes the rolling mean over `n` points. The length of the output array is decreased by `n-1` points.
 
@@ -35,7 +35,7 @@ end
 
 
 """
-	function convolve_1d(u::AbstractVector, v::Vector)
+	convolve_1d(u::AbstractVector, v::Vector)
 
 One-dimensional convolution between the vectors `u` (size m) and `v` (size n). Returns a vector of size m+n-1.
 """

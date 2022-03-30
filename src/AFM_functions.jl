@@ -1,5 +1,5 @@
 """
-    function deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64;
+    deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64;
         pad::Bool=false, val::Union{Missing,Float64}=missing)::Tuple{T,T} where T<:AbstractVector{Float64}
     
 AFM force deconvolution using the Sadar-Jarvis method, as described in [Appl. Phys. Lett. 84, 1801 (2004)](https://aip.scitation.org/doi/10.1063/1.1667267).
@@ -53,7 +53,7 @@ end
 
 
 """
-    function deconvolve_matrix(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+    deconvolve_matrix(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
     
 AFM force deconvolution using the Matrix method, as described in [Appl. Phys. Lett. 78, 123 (2001)](https://aip.scitation.org/doi/10.1063/1.1335546).
 Values for the tip-height `z` should be equally spaced and in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
@@ -91,7 +91,7 @@ end
 
 
 """
-    function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
+    inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
         window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing,
         backend::Module=Main)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
     

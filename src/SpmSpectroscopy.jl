@@ -48,7 +48,7 @@ end
 
 
 """
-    function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
+    load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
         index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
 
@@ -74,7 +74,7 @@ precompile(load_spectrum, (String, ))
 
 
 """
-    function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
+    load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
         index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
@@ -171,7 +171,7 @@ precompile(load_spectrum_nanonis, (String, ))
 
 
 """
-    function correct_background!(xdata<:Vector{<:Real}, ydata<:Vector{<:AbstractFloat}, type::Background, offset::Bool=true)::Nothing
+    correct_background!(xdata<:Vector{<:Real}, ydata<:Vector{<:AbstractFloat}, type::Background, offset::Bool=true)::Nothing
 
 Background correction of `ydata` vs. `xdata` with using a correction of type `type`.
 If `offset` is `true` (default), then `ydata` will be shifted such that its minimum is 0.
