@@ -31,6 +31,12 @@ using Test
     @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat", Experiment: "Z spectroscopy", 22 channels, 128 points)"""
     print(IOContext(io, :compact => true), s)
     @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat")"""
+    s = load_spectrum("Z-Spectroscopy__012.dat", index_column=true, index_column_type=Float64, header_only=true)
+    io = IOBuffer()
+    print(IOContext(io, :compact => false), s)
+    @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat", Experiment: "Z spectroscopy", 22 channels, 0 points)"""
+    print(IOContext(io, :compact => true), s)
+    @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat")"""
 end
 
 @testset "background corrections" begin
