@@ -23,6 +23,14 @@ using Test
 
     s = load_spectrum("Z-Spectroscopy002.dat")  # default for remove_missing is false
     @test size(s.data) == (256,17)
+
+    # Base.show
+    s = load_spectrum("Z-Spectroscopy__012.dat", index_column=true, index_column_type=Float64)
+    io = IOBuffer()
+    print(IOContext(io, :compact => false), s)
+    @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat", Experiment: "Z spectroscopy", 22 channels, 128 points)"""
+    print(IOContext(io, :compact => true), s)
+    @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat")"""
 end
 
 @testset "background corrections" begin

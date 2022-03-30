@@ -39,11 +39,17 @@ mutable struct SpmSpectrum
 end
 SpmSpectrum(filename::String) = SpmImage(filename, OrderedDict(), DataFrame(), String[], String[], Float64[], 0., false, DateTime(-1))
 
-mutable struct SpmSpectrumChannel
-    channel_name::String
-    channel_unit::String
-    direction::Direction
-    data::Array{Float64}
+
+function Base.show(io::IO, s::SpmSpectrum)
+    if get(io, :compact, false)
+        print(io, "SpmSpectrum(\"", s.filename, "\")")
+    else
+        print(io, "SpmSpectrum(\"", s.filename, "\", ")
+        if haskey(s.header, "Experiment")
+            print(io, "Experiment: \"", s.header["Experiment"], "\", ")
+        end
+        print(io, length(s.channel_names), " channels, ", size(s.data, 1), " points)")
+    end
 end
 
 
