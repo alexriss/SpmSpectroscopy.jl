@@ -121,18 +121,14 @@ end
     @test z_ ≈ z[1:end-3]
 
     # padding
-    z_, F = SpmSpectroscopy.deconvolve_sader_jarvis(z, df, 30000., 60e-12, 1800., pad=true, val=missing)
-    @test all(abs.(skipmissing(F) .- F_ml) .< 1e-13)
+    z_, F = SpmSpectroscopy.deconvolve_sader_jarvis(z, df, 30000., 60e-12, 1800., pad=true, val=NaN)
+    @test all(abs.(filter(!isnan, F) .- F_ml) .< 1e-13)
     @test length(F) == length(z)
-    @test all(ismissing.(F[end-2:end]))
+    @test all(isnan.(F[end-2:end]))
     @test z_ ≈ z
     z_, F = SpmSpectroscopy.deconvolve_sader_jarvis(z, df, 30000., 60e-12, 1800., pad=true, val=0.7)
     @test length(F) == length(z)
     @test all(F[end-2:end] .≈ 0.7)
-    @test z_ ≈ z
-    z_, F = SpmSpectroscopy.deconvolve_sader_jarvis(z, df, 30000., 60e-12, 1800., pad=true, val=NaN)
-    @test length(F) == length(z)
-    @test all(isnan.(F[end-2:end]))
     @test z_ ≈ z
 
     # Matrix deconvolution

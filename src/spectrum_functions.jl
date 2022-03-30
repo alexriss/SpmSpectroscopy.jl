@@ -1,10 +1,10 @@
 """
-    trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
+	trapz(X::AbstractVector{<:Real}, Y::AbstractVector{<:Real})::AbstractVector{<:AbstractFloat}
 
-Trapezoidal integration over a function given by dicrete points in the arrays `Y` vs `X`,
+Trapezoidal integration over a function given by discrete points in the arrays `Y` vs `X`,
 where the spacing between the points in `X` is not necessarily constant.
 """
-function trapz(X::AbstractVector{Float64}, Y::AbstractVector{Float64})::Float64
+function trapz(X::AbstractVector{<:Real}, Y::AbstractVector{<:Real})::AbstractFloat
     @assert length(X) == length(Y)
     res = 0.
     for i = 1:length(X) - 1
@@ -15,14 +15,14 @@ end
 
 
 """
-    rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
+	rolling_mean(arr::AbstractArray{<:Real}, n::Int)::AbstractArray{<:AbstractFloat}
 
 Computes the rolling mean over `n` points. The length of the output array is decreased by `n-1` points.
 
 Adapted from:
 https://stackoverflow.com/questions/59562325/moving-average-in-julia
 """
-function rolling_mean(arr::AbstractArray{Float64}, n::Int)::AbstractArray{Float64}
+function rolling_mean(arr::AbstractArray{<:Real}, n::Int)::AbstractArray{<:AbstractFloat}
     so_far = sum(@view arr[1:n])
     out = zeros(Float64, length(arr) - n + 1)
     out[1] = so_far / n
@@ -35,11 +35,11 @@ end
 
 
 """
-	convolve_1d(u::AbstractVector, v::Vector)
+	convolve_1d(u::AbstractVector{<:Real}, v::AbstractVector{<:Real})::AbstractVector{<:Real}
 
 One-dimensional convolution between the vectors `u` (size m) and `v` (size n). Returns a vector of size m+n-1.
 """
-function convolve_1d(u::AbstractVector, v::AbstractVector)
+function convolve_1d(u::AbstractVector{<:Real}, v::AbstractVector{<:Real})::AbstractVector{<:Real}
     m = length(u)
     n = length(v)
     w = zeros(m + n - 1)
@@ -52,7 +52,9 @@ end
 
 
 """
-	savitzky_golay_filter(y::AbstractVector, window_size::Integer, polynomial_order::Integer; deriv_order::Integer = 0, boundary_mode = :interpolation)
+	savitzky_golay_filter(y::AbstractVector{<:Real}, window_size::Integer, polynomial_order::Integer;
+		deriv_order::Integer=0, boundary_mode=:interpolation)::AbstractVector{<:AbstractFloat}
+
 
 Apply Savitzky-Golay polynomial smoothing to input data `y` using a polynomial of order `polynomial_order` fit to a moving window `window_size` points wide. Optionally derivatives can be taken by specifying the `deriv_order` and the caller is responsible for the appropriate scaling by the point spacing. Handling of data within half the window size is specified by `boundary_mode`. When set to `:interpolation` the polynomial fit will be used; when set to `:nearest` the data will be padded using the edge values before convolution and the valid portion will then be returned.  
 # References
@@ -60,7 +62,8 @@ Apply Savitzky-Golay polynomial smoothing to input data `y` using a polynomial o
 2. Steinier, J., Termonia, Y., & Deltour, J. (1972). Comments on Smoothing and differentiation of data by simplified least square procedure. Analytical Chemistry, 44(11), 1906–1909. https://doi.org/10.1021/ac60319a045
 3. Press, W. H., & Teukolsky, S. A. (1990). Savitzky-Golay Smoothing Filters. Computers in Physics, 4(6), 669. https://doi.org/10.1063/1.4822961
 """
-function savitzky_golay_filter(y::AbstractVector, window_size::Integer, polynomial_order::Integer; deriv_order::Integer = 0, boundary_mode = :interpolation)
+function savitzky_golay_filter(y::AbstractVector{<:Real}, window_size::Integer, polynomial_order::Integer;
+	deriv_order::Integer=0, boundary_mode=:interpolation)::AbstractVector{<:AbstractFloat}
     # from QLab.jl https://github.com/BBN-Q/Qlab.jl, Apache Software License
 
 	# input validity checks
