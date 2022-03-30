@@ -1,6 +1,6 @@
 """
-    deconvolve_sader_jarvis(z::T, Δf::AbstractVector{<:Real}, f₀::Real, A::Real, k::Real;
-        pad::Bool=false, val::Real=NaN)::Tuple{T,Vector{Float64}} where T<:AbstractVector{<:Real}
+    deconvolve_sader_jarvis(z::AbstractVector{<:Real}, Δf::AbstractVector{<:Real}, f₀::Real, A::Real, k::Real;
+        pad::Bool=false, val::Real=NaN)::Tuple{AbstractVector{<:Real},Vector{Float64}}
     
 AFM force deconvolution using the Sadar-Jarvis method, as described in [Appl. Phys. Lett. 84, 1801 (2004)](https://aip.scitation.org/doi/10.1063/1.1667267).
 Values for the tip-height `z` should be in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
@@ -10,8 +10,8 @@ If `pad` is true, the resulting array will be padded with `val` so that it has t
 
 Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
 """
-function deconvolve_sader_jarvis(z::T, Δf::AbstractVector{<:Real}, f₀::Real, A::Real, k::Real;
-        pad::Bool=false, val::Real=NaN)::Tuple{T,Vector{Float64}} where T<:AbstractVector{<:Real}
+function deconvolve_sader_jarvis(z::AbstractVector{<:Real}, Δf::AbstractVector{<:Real}, f₀::Real, A::Real, k::Real;
+        pad::Bool=false, val::Real=NaN)::Tuple{AbstractVector{<:Real},Vector{Float64}}
     @assert issorted(z)
     
     ω = Δf / f₀
@@ -52,8 +52,8 @@ end
 
 
 """
-    function deconvolve_matrix(z::T, Δf::AbstractVector{<:Real},
-        f₀::Real, A::Real, k::Real)::Tuple{T,Vector{Float64}} where T<:AbstractVector{<:Real}
+    deconvolve_matrix(z::AbstractVector{<:Real}, Δf::AbstractVector{<:Real},
+        f₀::Real, A::Real, k::Real)::Tuple{AbstractVector{<:Real},Vector{Float64}}
 
     
 AFM force deconvolution using the Matrix method, as described in [Appl. Phys. Lett. 78, 123 (2001)](https://aip.scitation.org/doi/10.1063/1.1335546).
@@ -62,8 +62,8 @@ the experimental parameters `f₀` (resonance frequency), `A` (oscillation ampli
 
 Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
 """
-function deconvolve_matrix(z::T, Δf::AbstractVector{<:Real},
-    f₀::Real, A::Real, k::Real)::Tuple{T,Vector{Float64}} where T<:AbstractVector{<:Real}
+function deconvolve_matrix(z::AbstractVector{<:Real}, Δf::AbstractVector{<:Real},
+    f₀::Real, A::Real, k::Real)::Tuple{AbstractVector{<:Real},Vector{Float64}}
 
     @assert issorted(z)
 
@@ -94,9 +94,10 @@ end
 
 
 """
-    inflection_point_test(z::T, F::T, A::Real; window_size::T2=nothing, polynomial_order::T2=nothing,
-        window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing,
-        backend::Module=Main)::NamedTuple where {T<:AbstractVector{<:Real}, T2<:Union{Int,Nothing}}
+    inflection_point_test(z::AbstractVector{<:Real}, F::AbstractVector{<:Real}, A::Real;
+        window_size::Union{Int,Nothing}=nothing, polynomial_order::Union{Int,Nothing}=nothing,
+        window_size_deriv::Union{Int,Nothing}=nothing, polynomial_order_deriv::Union{Int,Nothing}=nothing,
+        backend::Module=Main)::NamedTuple
     
 Inflection point test on whether a AFM force deconvolution is reliable. The test has been described in [Nature Nanotechnology volume 13, 1088– (2018)](https://www.nature.com/articles/s41565-018-0277-x).
 Values for the tip-height `z` should be equally spaced and in ascending order. The corresponding values for force (after deconvolution) are given in the vector `f`. The value for the oscillation amplitude
@@ -120,9 +121,10 @@ This function is highly experimental. It is highly dependent on the smoothing pa
 
 Based on MATLAB code from [Journal of Applied Physics 127, 184301 (2020)](https://aip.scitation.org/doi/10.1063/5.0003291). As opposed to the spline fit suggested in the reference, Savitzky_Golay filtering is used here.
 """
-function inflection_point_test(z::T, F::T, A::Real; window_size::T2=nothing, polynomial_order::T2=nothing,
-    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing,
-    backend::Module=Main)::NamedTuple where {T<:AbstractVector{<:Real}, T2<:Union{Int,Nothing}}
+function inflection_point_test(z::AbstractVector{<:Real}, F::AbstractVector{<:Real}, A::Real;
+    window_size::Union{Int,Nothing}=nothing, polynomial_order::Union{Int,Nothing}=nothing,
+    window_size_deriv::Union{Int,Nothing}=nothing, polynomial_order_deriv::Union{Int,Nothing}=nothing,
+    backend::Module=Main)::NamedTuple
 
     @assert length(z) == length(F)
 
