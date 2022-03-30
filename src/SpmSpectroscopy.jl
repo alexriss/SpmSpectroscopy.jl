@@ -4,7 +4,6 @@ using CSV
 using DataFrames
 using DataStructures: OrderedDict
 using Dates
-using Plots
 using Printf
 using Statistics
 using TOML

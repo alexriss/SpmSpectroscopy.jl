@@ -1,19 +1,25 @@
 """
-    function deconvolve_sadar_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+    function deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64;
+        pad::Bool=false, val::Union{Missing,Float64}=missing)::Tuple{T,T} where T<:AbstractVector{Float64}
     
 AFM force deconvolution using the Sadar-Jarvis method, as described in [Appl. Phys. Lett. 84, 1801 (2004)](https://aip.scitation.org/doi/10.1063/1.1667267).
 Values for the tip-height `z` should be in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
 the experimental parameters `f₀` (resonance frequency), `A` (oscillation amplitude), and `k` (cantilever stiffness).
 
+If `pad` is true, the resulting array will be padded with `val` so that it has the same length as the input arrays `z` and `Δf`.
+
 Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
 """
-function deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
+function deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64;
+        pad::Bool=false, val::Union{Missing,Float64}=missing)::Tuple{T,Vector{Union{Float64,Missing}}} where T<:AbstractVector{Float64}
     @assert issorted(z)
     
     ω = Δf / f₀
     dω_dz = diff(ω) ./ diff(z)
     
-    F = Vector{Float64}(undef, length(z) - 3)
+    output_length = pad ? length(z) : length(z) - 3
+    F_type = ismissing(val) ? Union{Float64,Missing} : Float64
+    F = Vector{F_type}(undef, output_length)
 
     # we use `end-1` for both z and ω because dω_dz is shorter by one element
     for j=1:length(z)-3
@@ -38,6 +44,10 @@ function deconvolve_sader_jarvis(z::T, Δf::T, f₀::Float64, A::Float64, k::Flo
     # adjust length of z
     z_ = z[1:length(F)]
 
+    if pad
+        F[end-2:end] .= val
+    end
+
     return z_, F
 end
 
@@ -48,7 +58,7 @@ end
 AFM force deconvolution using the Matrix method, as described in [Appl. Phys. Lett. 78, 123 (2001)](https://aip.scitation.org/doi/10.1063/1.1335546).
 Values for the tip-height `z` should be equally spaced and in ascending order. The corresponding values for the frequency shift are given in the vector `Δf`, along with
 the experimental parameters `f₀` (resonance frequency), `A` (oscillation amplitude), and `k` (cantilever stiffness).
-    
+
 Based on MATLAB code from [Beilstein J. Nanotechnol. 3, 238 (2012)](https://www.beilstein-journals.org/bjnano/articles/3/27).
 """
 function deconvolve_matrix(z::T, Δf::T, f₀::Float64, A::Float64, k::Float64)::Tuple{T,T} where T<:AbstractVector{Float64}
@@ -82,7 +92,8 @@ end
 
 """
     function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
-    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
+        window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing,
+        backend::Module=Main)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
     
 Inflection point test on whether a AFM force deconvolution is reliable. The test has been described in [Nature Nanotechnology volume 13, 1088– (2018)](https://www.nature.com/articles/s41565-018-0277-x).
 Values for the tip-height `z` should be equally spaced and in ascending order. The corresponding values for force (after deconvolution) are given in the vector `f`. The value for the oscillation amplitude
@@ -99,13 +110,16 @@ Returns a named tuple:
   - `amplitude_range`: amplitude ranges that possibly cause ill-posedness
   - `plot`: a plot with the fit, inflection points, as well as normalized and smoothed force and its derivatives (up to third order).
 
+For a plot output, the `Plots` module should be loaded - it is not in the dependencies to save startup time.
+A `backend` can be specified, if `Plots` is not loaded in the `Main` module.
+
 This function is highly experimental. It is highly dependent on the smoothing parameters.
 
 Based on MATLAB code from [Journal of Applied Physics 127, 184301 (2020)](https://aip.scitation.org/doi/10.1063/5.0003291). As opposed to the spline fit suggested in the reference, Savitzky_Golay filtering is used here.
-
 """
 function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, polynomial_order::T2=nothing,
-    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
+    window_size_deriv::T2=nothing, polynomial_order_deriv::T2=nothing,
+    backend::Module=Main)::NamedTuple where {T<:AbstractVector{Float64}, T2<:Union{Int,Nothing}}
 
     @assert length(z) == length(F)
 
@@ -191,17 +205,21 @@ function inflection_point_test(z::T, F::T, A::Float64; window_size::T2=nothing, 
         end
     end
     
-    p1 = plot(z, F, label = "F", legend=:topleft)
-    plot!(z, F_sg, label = "F_sg")
-    scatter!(z[i_ifp], F_sg[i_ifp], label = "ifp", linewidth=0, ms=5, color=colors)
-    
-    p2 = plot(z, F_sg ./ maximum(abs.(F_sg)), label = "F_sg norm")
-    plot!(z, F′_sg_sg ./ maximum(abs.(F′_sg_sg)), label = "F′_sg norm")
-    plot!(z, F′′_sg_sg ./ maximum(abs.(F′′_sg_sg)), label = "F′′_sg norm")
-    # plot!(z, F′′′_sg ./ maximum(abs.(F′′′_sg)), label = "F′′′_sg_sg norm")
-    plot!(z, F′′′_sg_sg ./ maximum(abs.(F′′′_sg_sg)), label = "F′′′_sg_sg norm")
-    
-    p_all = plot(p1, p2, layout=(2,1))
+    if isdefined(backend, plot)
+        p1 = backend.plot(z, F, label = "F", legend=:topleft)
+        backend.plot!(z, F_sg, label = "F_sg")
+        backend.scatter!(z[i_ifp], F_sg[i_ifp], label = "ifp", linewidth=0, ms=5, color=colors)
+        
+        p2 = backend.plot(z, F_sg ./ maximum(abs.(F_sg)), label = "F_sg norm")
+        backend.plot!(z, F′_sg_sg ./ maximum(abs.(F′_sg_sg)), label = "F′_sg norm")
+        backend.plot!(z, F′′_sg_sg ./ maximum(abs.(F′′_sg_sg)), label = "F′′_sg norm")
+        # backend.plot!(z, F′′′_sg ./ maximum(abs.(F′′′_sg)), label = "F′′′_sg_sg norm")
+        backend.plot!(z, F′′′_sg_sg ./ maximum(abs.(F′′′_sg_sg)), label = "F′′′_sg_sg norm")
+        
+        p_all = backend.plot(p1, p2, layout=(2,1))
+    else
+        p_all = missing
+    end
 
     return (z_inp=z_ifp, i_ifp=i_ifp, well_behaved=well_behaved, S_F=S_F, amplitude_range=collect(zip(L_ifp, z_ifp_half)), plot=p_all)
 end
