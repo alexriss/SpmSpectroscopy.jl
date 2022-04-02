@@ -49,6 +49,7 @@ function deconvolve_sader_jarvis(z::AbstractVector{<:Real}, Δf::AbstractVector{
 
     return z_, F
 end
+# precompile(deconvolve_sader_jarvis, (Vector{Float64}, Vector{Float64}, Float64, Float64, Float64))
 
 
 """
@@ -91,6 +92,7 @@ function deconvolve_matrix(z::AbstractVector{<:Real}, Δf::AbstractVector{<:Real
     reverse!(F)
     return z[1:end], F  # return copy of z
 end
+# precompile(deconvolve_sader_jarvis, (Vector{Float64}, Vector{Float64}, Float64, Float64, Float64))
 
 
 """

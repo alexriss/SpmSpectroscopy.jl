@@ -12,6 +12,7 @@ function trapz(X::AbstractVector{<:Real}, Y::AbstractVector{<:Real})::AbstractFl
     end
     return res / 2.
 end
+precompile(trapz, (Vector{Float64}, Vector{Float64}))
 
 
 """
@@ -32,6 +33,7 @@ function rolling_mean(arr::AbstractArray{<:Real}, n::Int)::AbstractArray{<:Abstr
     end
     return out
 end
+precompile(rolling_mean, (Vector{Float64}, Int))
 
 
 """
@@ -49,6 +51,7 @@ function convolve_1d(u::AbstractVector{<:Real}, v::AbstractVector{<:Real})::Abst
     #return w[n:end-n+1]
     return w
 end
+precompile(convolve_1d, (Vector{Float64}, Vector{Float64}))
 
 
 """
@@ -137,5 +140,5 @@ function savitzky_golay_filter(y::AbstractVector{<:Real}, window_size::Integer, 
 		return smoothed[window_size:end-2*m]
 
 	end
-
 end
+# precompile(savitzky_golay_filter, (Vector{Float64}, Int, Int))

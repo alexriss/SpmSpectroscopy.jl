@@ -76,7 +76,9 @@ function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], 
 
     return spectrum
 end
-precompile(load_spectrum, (String, ))
+# precompile(load_spectrum, (String, ))
+# ompile(Core.kwfunc(load_spectrum), (Vector{Any}, typeof(load_spectrum), String))
+
 
 
 """
@@ -173,11 +175,12 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
 
     return SpmSpectrum(filename, header, data, channel_names, channel_units, position, bias, z_feedback, start_time)
 end
-precompile(load_spectrum_nanonis, (String, ))
+# precompile(load_spectrum_nanonis, (String, ))
+# precompile(Core.kwfunc(load_spectrum_nanonis), (Vector{Any}, typeof(load_spectrum_nanonis), String))
 
 
 """
-    correct_background!(xdata<:Vector{<:Real}, ydata<:Vector{<:Real}, type::Background, offset::Bool=true)::Nothing
+    correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVector{<:Real}, type::Background, offset::Bool=true)::Nothing
 
 Background correction of `ydata` vs. `xdata` with using a correction of type `type`.
 If `offset` is `true` (default), then `ydata` will be shifted such that its minimum is 0.
@@ -206,6 +209,6 @@ function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVecto
     end
     return nothing
 end
-precompile(correct_background!, (Vector{Float64}, Vector{Float64}, Background, Bool))
+# precompile(correct_background!, (Vector{Float64}, Vector{Float64}, Background, Bool))
 
 end
