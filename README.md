@@ -6,6 +6,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alexriss.github.io/SpmSpectroscopy.jl/dev)
 [![Build Status](https://github.com/alexriss/SpmSpectroscopy.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/alexriss/SpmSpectroscopy.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/alexriss/SpmSpectroscopy.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/alexriss/SpmSpectroscopy.jl)
+<a href="https://twitter.com/00alexx"><img src="https://img.shields.io/twitter/follow/00alexx?style=social" alt="Twitter"></a>
 
 A julia library to analyze scanning tunneling and atomic force spectroscopy data.
 
@@ -27,6 +28,11 @@ s.data  # all data in a DataFrame
 s.data.Current  # get data for a "Current" channel
 s.data[!, "Current"]  # get data for a "Current" channel
 ```
+
+## Get in touch
+
+Please post issues, suggestions, and pull requests on github. <a href="https://twitter.com/00alexx">Follow me on twitter</a> for updates and more information about this project: 
+<a href="https://twitter.com/00alexx"><img src="https://img.shields.io/twitter/follow/00alexx?style=social" alt="Twitter"></a>
 
 ## Related projects
 
