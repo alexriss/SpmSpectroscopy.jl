@@ -144,7 +144,10 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             end
         end
         if haskey(header, "Date")
-            start_time = DateTime(header["Date"], dateformat"d.m.Y H:M:S")
+            try
+                start_time = DateTime(header["Date"], dateformat"d.m.Y H:M:S")
+            catch e
+            end
         end
 
         if !header_only
