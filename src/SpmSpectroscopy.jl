@@ -108,15 +108,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             l = readline(f)
             if l == "[DATA]"
                 l = readline(f)
-                channels = split(l, "\t")
-                channel_names = Vector{String}(undef, length(channels))
-                channel_units = Vector{String}(undef, length(channels))
-                for (i, ch) in enumerate(channels)
-                    posl = findlast('(', ch)
-                    posr = findlast(')', ch)
-                    channel_names[i] = ch[1:posl-2]
-                    channel_units[i] = ch[posl+1:posr-1]
-                end
+                channel_names, channel_units = get_channel_names_units(l)
                 break
             else
                 header_data = split(l, "\t")
@@ -218,22 +210,8 @@ function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Boo
 
             if comment && endswith(l, "data=")
                 l = readline(f)
-                channels = split(l, "\t")
-                channel_names = Vector{String}(undef, length(channels))
-                channel_units = Vector{String}(undef, length(channels))
-                for (i, ch) in enumerate(channels)
-                    posl = findlast('(', ch)
-                    posr = findlast(')', ch)
-                    if isnothing(posl) || isnothing(posr)
-                        ch_name = strip(ch)
-                        ch_unit = ""
-                    else
-                        ch_name = ch[1:posl-2]
-                        ch_unit = ch[posl+1:posr-1]
-                    end
-                    channel_names[i] = ch_name
-                    channel_units[i] = ch_unit
-                end
+                l = l[3:end]  # remove the "#C"
+                channel_names, channel_units = get_channel_names_units(l)
                 break
             else
                 header_data = split(l, "::", limit=2)
@@ -296,6 +274,32 @@ function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Boo
     end
 
     return SpmSpectrum(filename, header, data, channel_names, channel_units, position, bias, z_feedback, start_time)
+end
+
+
+"""
+    get_channel_names_units(l::String)::Tuple{Vector{String}, Vector{String}}
+
+Extracts the channel names and units from the line `l` of a Nanonis .dat file or GSXM .vpdata file.
+"""
+function get_channel_names_units(l::String)::Tuple{Vector{String}, Vector{String}}
+    channels = split(l, "\t")
+    channel_names = Vector{String}(undef, length(channels))
+    channel_units = Vector{String}(undef, length(channels))
+    for (i, ch) in enumerate(channels)
+        posl = findlast('(', ch)
+        posr = findlast(')', ch)
+        if isnothing(posl) || isnothing(posr)
+            ch_name = strip(ch)
+            ch_unit = ""
+        else
+            ch_name = ch[1:posl-2]
+            ch_unit = ch[posl+1:posr-1]
+        end
+        channel_names[i] = strip(ch_name, '"')
+        channel_units[i] = ch_unit
+    end
+    return channel_names, channel_units
 end
 
 
