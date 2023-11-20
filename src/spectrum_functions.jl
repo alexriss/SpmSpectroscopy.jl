@@ -142,3 +142,36 @@ function savitzky_golay_filter(y::AbstractVector{<:Real}, window_size::Integer, 
 	end
 end
 # precompile(savitzky_golay_filter, (Vector{Float64}, Int, Int))
+
+
+"""
+    correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVector{<:Real}, type::Background, offset::Bool=true)::Nothing
+
+Background correction of `ydata` vs. `xdata` with using a correction of type `type`.
+If `offset` is `true` (default), then `ydata` will be shifted such that its minimum is 0.
+"""
+function correct_background!(xdata::AbstractVector{<:Real}, ydata::AbstractVector{<:Real}, type::Background, offset::Bool=true)::Nothing
+    if type == no_correction
+        return nothing
+    end
+    if length(ydata) == 0
+        return nothing
+    end
+    if type == linear_fit
+        # https://en.wikipedia.org/wiki/Ordinary_least_squares#Simple_linear_regression_model
+
+        varx = var(xdata)
+        if varx > 0
+            meanx = mean(xdata)
+            β = cov(xdata, ydata) / varx
+            α = mean(ydata) - β * meanx
+            @. ydata = ydata - α - xdata * β
+        end
+    end
+    if type == subtract_minimum || offset
+        m = minimum(filter(!isnan, ydata))
+        ydata .-= m
+    end
+    return nothing
+end
+# precompile(correct_background!, (Vector{Float64}, Vector{Float64}, Background, Bool))
