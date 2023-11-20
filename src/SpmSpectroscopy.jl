@@ -216,8 +216,21 @@ function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Boo
             else
                 header_data = split(l, "::", limit=2)
                 length(header_data) == 2 || (header_data = split(l, "\t", limit=2))
+
                 if length(header_data) == 2
-                    header[strip(header_data[1])] = strip(header_data[2])
+                    key = strip(header_data[1])
+                    val = strip(header_data[2])
+
+                    # check if key already exists
+                    if haskey(header, key)
+                        i_key = 1
+                        while haskey(header, key * " $(i_key)")
+                            i_key += 1
+                        end
+                        key *= " $(i_key)"
+                    end
+    
+                    header[key] = val
                 end
             end
         end
