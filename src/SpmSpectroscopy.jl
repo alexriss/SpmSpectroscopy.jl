@@ -36,7 +36,12 @@ mutable struct SpmSpectrum
     
     start_time::DateTime
 end
-SpmSpectrum(filename::String) = SpmImage(filename, OrderedDict(), DataFrame(), String[], String[], Float64[], 0., false, DateTime(-1))
+SpmSpectrum(filename::String) = SpmImage(
+    filename, OrderedDict(), DataFrame(), String[], String[],
+    Float64[],
+    0., false,
+    DateTime(-1)
+)
 
 
 function Base.show(io::IO, s::SpmSpectrum)
@@ -104,6 +109,12 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
     z_feedback = false
     start_time = DateTime(-1)
     open(filename) do f
+        experiment = split(readline(f), '\t')
+        if length(experiment) >= 2 && experiment[1] == "Experiment"
+            header["experiment[1]"] = experiment[2]
+        else
+            error("This is not a Nanonis .dat file.")
+        end
         while !eof(f)
             l = readline(f)
             if l == "[DATA]"
@@ -111,7 +122,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
                 channel_names, channel_units = get_channel_names_units(l)
                 break
             else
-                header_data = split(l, "\t")
+                header_data = split(l, '\t')
                 if length(header_data) >= 2
                     header[header_data[1]] = header_data[2]
                 end
@@ -131,9 +142,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
             bias = parse(Float64, header["Bias (V)"])
         end
         if haskey(header, "Z-Ctrl hold")
-            if header["Z-Ctrl hold"] == "FALSE"
-                z_feedback = true
-            end
+            z_feedback = header["Z-Ctrl hold"] == "FALSE" ? true : false
         end
         if haskey(header, "Date")
             try
@@ -194,7 +203,7 @@ function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Boo
     channel_units = Vector{String}()
     position = Float64[NaN,NaN,NaN]
     bias = NaN
-    z_feedback = false
+    z_feedback = true
     start_time = DateTime(-1)
     open(filename) do f
         while !eof(f)
