@@ -249,12 +249,12 @@ function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Boo
             posl = findfirst("X0=", h)
             posr = findnext("Ang", h, posl[end]+1)
             if !isnothing(posl) && !isnothing(posr)
-                position[1] = parse(Float64, h[posl[end]+1:posr[1]-1])
+                position[1] = parse(Float64, h[posl[end]+1:posr[1]-1]) * 1e-10  # convert from Angstrom to m
             end
-            posl = findnext("X0=", h, posr[end]+1)
+            posl = findnext("Y0=", h, posr[end]+1)
             posr = findnext("Ang", h, posl[end]+1)
             if !isnothing(posl) && !isnothing(posr)
-                position[2] = parse(Float64, h[posl[end]+1:posr[1]-1])
+                position[2] = parse(Float64, h[posl[end]+1:posr[1]-1]) * 1e-10  # convert from Angstrom to m
             end
         end
         # todo: bias
