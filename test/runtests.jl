@@ -1,7 +1,7 @@
 using SpmSpectroscopy
 using Test
 
-@testset "loading" begin
+@testset "loading nanonis" begin
     s = load_spectrum("Bias-Spectroscopy003.dat")
     @test all(s.position .≈ [ 1.1009e-8, -2.08172e-7, -9.98825e-9 ])
     @test s.header["Oscillation Control>Cut off frq (Hz)"] == "389"
@@ -37,6 +37,41 @@ using Test
     @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat", Experiment: "Z spectroscopy", 22 channels, 0 points)"""
     print(IOContext(io, :compact => true), s)
     @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat")"""
+end
+
+@testset "loading gsxm" begin
+    fname = "2022_10_27_010-VP001-VP.vpdata"
+    s = load_spectrum(fname)
+
+    @test s.position[1] ≈ 675.188542126e-10
+    @test s.position[2] ≈ -233.108367789e-10
+    @test isnan(s.position[3])
+    @test s.header["GXSM-Main-Offset"] == "X0=675.188542126 Ang  Y0=-233.108367789 Ang, iX0=150 Pix iX0=150 Pix"
+    @test s.header["DSP SCANCOORD POSITION"] == "DSP-XSpos=149 DSP-YSpos=149 CENTER-DSP-XSpos=0 CENTER-DSP-YSpos=0"
+    @test s.channel_names == ["Index", "Bias", "ADC0-I", "ADC4", "ADC5", "Bias", "Block-Start-Index"]
+    @test s.channel_units == ["", "V", "nA", "V", "V", "V", ""]
+
+    @test size(s.data) == (400,7)
+    @test s.data[3,"Index"] ≈ 2.0
+    @test s.data[200,"ADC0-I"] ≈ -0.00335703604236
+    @test s.data[318,"Bias"] ≈ 0.5848615927792
+    @test s.data[211,"ADC5"] ≈  0.0167851802118
+
+    fname = "2022_10_14_001-VP005-VP.vpdata"
+    s = load_spectrum(fname)
+    @test s.position[1] ≈ -395.07739718e-10
+    @test s.position[2] ≈ -269.313209653e-10
+    @test isnan(s.position[3])
+    @test s.header["GXSM-Main-Offset"] == "X0=-395.07739718 Ang  Y0=-269.313209653 Ang, iX0=63 Pix iX0=461 Pix"
+    @test s.header["DSP SCANCOORD POSITION"] == "DSP-XSpos=299 DSP-YSpos=299 CENTER-DSP-XSpos=0 CENTER-DSP-YSpos=0"
+ 
+    @test s.channel_names == ["Index", "Bias", "ADC0-I", "ADC4", "ADC5", "Bias", "Block-Start-Index"]
+    @test s.channel_units == ["", "V", "nA", "V", "V", "V", ""]
+    @test size(s.data) == (5000,7)
+    @test s.data[3,"Index"] ≈ 2.0
+    @test s.data[200,"ADC0-I"] ≈ -0.038148136845
+    @test s.data[5000,"Bias"] ≈ -0.9960352224505
+    @test s.data[211,"ADC5"] ≈ 0.9253212073122
 end
 
 @testset "background corrections" begin
