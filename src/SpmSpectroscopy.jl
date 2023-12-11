@@ -111,7 +111,7 @@ function load_spectrum_nanonis(filename::AbstractString; select::AbstractVector=
     open(filename) do f
         experiment = split(readline(f), '\t')
         if length(experiment) >= 2 && experiment[1] == "Experiment"
-            header["experiment[1]"] = experiment[2]
+            header[experiment[1]] = experiment[2]
         else
             error("This is not a Nanonis .dat file.")
         end
