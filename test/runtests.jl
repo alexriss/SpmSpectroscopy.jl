@@ -39,7 +39,7 @@ using Test
     @test String(take!(io)) == """SpmSpectrum("Z-Spectroscopy__012.dat")"""
 end
 
-@testset "loading gsxm" begin
+@testset "loading gxsm" begin
     fname = "2022_10_27_010-VP001-VP.vpdata"
     s = load_spectrum(fname)
 

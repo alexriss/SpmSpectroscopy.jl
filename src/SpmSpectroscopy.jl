@@ -75,7 +75,7 @@ function load_spectrum(filename::AbstractString; select::AbstractVector=Bool[], 
     if ext == "dat"
         spectrum = load_spectrum_nanonis(filename, select=select, header_only=header_only, remove_missing=remove_missing, index_column=index_column, index_column_type=index_column_type)
     elseif ext == "vpdata"
-        spectrum = load_spectrum_gsxm(filename, select=select, header_only=header_only, remove_missing=remove_missing, index_column=index_column, index_column_type=index_column_type)
+        spectrum = load_spectrum_gxsm(filename, select=select, header_only=header_only, remove_missing=remove_missing, index_column=index_column, index_column_type=index_column_type)
     else
         throw(ArgumentError("Unknown file type \"$ext\""))
     end
@@ -184,7 +184,7 @@ end
 
 
 """
-    load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
+    load_spectrum_gxsm(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
         index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
 Loads a spectrum from the file `filename`. Currently, only Nanonis .dat files are supported.
@@ -193,7 +193,7 @@ If `header_only` is `true`, then only the header is loaded.
 If `index_column` is `true`, then an extra column with indices of type `index_column_type` will be added.
 If `remove_missing` is `true`, then missing values are dropped.
 """
-function load_spectrum_gsxm(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
+function load_spectrum_gxsm(filename::AbstractString; select::AbstractVector=Bool[], header_only::Bool=false, remove_missing::Bool=false,
     index_column::Bool=false, index_column_type::Type=Int)::SpmSpectrum
 
     contents_data = ""
@@ -302,7 +302,7 @@ end
 """
     get_channel_names_units(l::String)::Tuple{Vector{String}, Vector{String}}
 
-Extracts the channel names and units from the line `l` of a Nanonis .dat file or GSXM .vpdata file.
+Extracts the channel names and units from the line `l` of a Nanonis .dat file or GXSM .vpdata file.
 """
 function get_channel_names_units(l::String)::Tuple{Vector{String}, Vector{String}}
     channels = split(l, "\t")
